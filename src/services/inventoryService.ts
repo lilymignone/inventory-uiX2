@@ -1,15 +1,17 @@
 // src/features/inventory/inventoryService.ts
 import axios from 'axios';
-import type { Product, ProductDto, Category, Supplier, ProductFilters } from '../types/inventory';
+import type { Product, ProductDto, Category, Supplier, ProductFilters, CategoryDto, CategoryFilters } from '../types/inventory';
 import { authService } from '../services/authService';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+// Using relative URL for proxy
+const API_BASE_URL = '/api';
 
 class InventoryService {
   private getHeaders(): Record<string, string> {
     return {
       'Content-Type': 'application/json',
-      ...authService.getAuthHeader(),
+      'Accept': 'application/json',
+      ...authService.getAuthHeader()
     };
   }
 
@@ -96,10 +98,12 @@ class InventoryService {
   // Categories
   async getCategories(): Promise<Category[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/categories`, {
+      const response = await axios({
+        method: 'GET',
+        url: `${API_BASE_URL}/categories`,
         headers: this.getHeaders(),
+        withCredentials: true
       });
-
       return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -107,15 +111,48 @@ class InventoryService {
     }
   }
 
-  async createCategory(categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category> {
+  async createCategory(categoryData: CategoryDto): Promise<Category> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/categories`, categoryData, {
+      const response = await axios({
+        method: 'POST',
+        url: `${API_BASE_URL}/categories`,
         headers: this.getHeaders(),
+        data: categoryData,
+        withCredentials: true
       });
-
       return response.data;
     } catch (error) {
       console.error('Error creating category:', error);
+      throw error;
+    }
+  }
+
+  async updateCategory(id: number, categoryData: CategoryDto): Promise<Category> {
+    try {
+      const response = await axios({
+        method: 'PUT',
+        url: `${API_BASE_URL}/categories/${id}`,
+        headers: this.getHeaders(),
+        data: categoryData,
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating category:', error);
+      throw error;
+    }
+  }
+
+  async deleteCategory(id: number): Promise<void> {
+    try {
+      await axios({
+        method: 'DELETE',
+        url: `${API_BASE_URL}/categories/${id}`,
+        headers: this.getHeaders(),
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error('Error deleting category:', error);
       throw error;
     }
   }
@@ -145,6 +182,12 @@ class InventoryService {
       console.error('Error creating supplier:', error);
       throw error;
     }
+  }
+
+  // Category endpoints
+  async getCategory(id: number): Promise<Category> {
+    const response = await axios.get(`${API_BASE_URL}/categories/${id}`);
+    return response.data;
   }
 }
 

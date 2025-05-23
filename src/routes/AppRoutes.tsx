@@ -10,6 +10,7 @@ import { Dashboard } from '../pages/Dashboard';
 import { Home } from '../pages/Home';
 import { About } from '../pages/About';
 import { NotFound } from '../pages/NotFound';
+import { CategoriesPage } from '../pages/CategoriesPage';
 
 // Inventory features (to be created)
 import { InventoryPage } from '../features/inventory/InventoryPage';
@@ -48,7 +49,7 @@ export const AppRoutes: React.FC = () => {
         path="/categories"
         element={
           <ProtectedRoute requireAnyRole={['ADMIN', 'MANAGER']}>
-            <div className="p-4">Categories page (to be implemented)</div>
+            <CategoriesPage />
           </ProtectedRoute>
         }
       />

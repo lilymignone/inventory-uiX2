@@ -5,7 +5,7 @@ import { InventoryList } from './InventoryList';
 import { InventoryFilters } from './components/InventoryFilters';
 import { ProductModal } from './components/ProductModal';
 import { inventoryService } from '../../services/inventoryService';
-import type { Product, ProductDto, ProductFilters, Category, Supplier } from '../../types/inventory';
+import { Product, ProductDto, ProductFilters, Category, Supplier } from '../../types/inventory';
 
 export const InventoryPage: React.FC = () => {
   // State

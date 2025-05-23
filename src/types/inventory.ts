@@ -22,11 +22,22 @@ export interface Product {
   }
   
   export interface Category {
-    id: string;
+    id: number;
     name: string;
     description: string;
     createdAt: string;
     updatedAt: string;
+  }
+  
+  export interface CategoryDto {
+    name: string;
+    description: string;
+  }
+  
+  export interface CategoryFilters {
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   }
   
   export interface Supplier {
