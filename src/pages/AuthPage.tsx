@@ -1,16 +1,16 @@
 // src/pages/AuthPage.tsx
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { LoginForm } from '../components/auth/LoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
 
 export const AuthPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
 
   // Redirect if already authenticated
-  if (isAuthenticated) {
+  if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 

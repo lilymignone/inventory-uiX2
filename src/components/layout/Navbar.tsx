@@ -1,7 +1,7 @@
 // src/components/layout/Navbar.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 export const Navbar: React.FC = () => {
   const { user, logout, hasAnyRole } = useAuth();
@@ -10,7 +10,7 @@ export const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth');
+    navigate('/login');
   };
 
   const toggleMenu = () => {

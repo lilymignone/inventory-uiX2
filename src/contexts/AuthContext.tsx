@@ -1,81 +1,92 @@
 // src/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import type { User, LoginRequest, RegisterRequest, AuthContextType } from '../types/auth';
+import React, { createContext, useState, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import type { User, LoginRequest } from '../types/auth';
 import { authService } from '../services/authService';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  updateUser: (user: User) => void;
+  setUser: (user: User | null) => void;
+  logout: () => void;
+  hasRole: (roleName: string) => boolean;
+  hasAnyRole: (roleNames: string[]) => boolean;
+  login: (credentials: LoginRequest) => Promise<void>;
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+      setIsLoading(false);
+      return parsedUser;
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
+      setIsLoading(false);
+      return null;
+    }
+  });
 
-  useEffect(() => {
-    // Initialize auth state from storage
-    authService.initializeAuth();
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-    setIsLoading(false);
+  const updateUser = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   }, []);
 
-  const login = async (credentials: LoginRequest): Promise<void> => {
+  const logout = useCallback(() => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('authCredentials');
+    authService.logout();
+  }, []);
+
+  const hasRole = useCallback((roleName: string): boolean => {
+    if (!user) return false;
+    return user.role.name === roleName;
+  }, [user]);
+
+  const hasAnyRole = useCallback((roleNames: string[]): boolean => {
+    if (!user) return false;
+    return roleNames.includes(user.role.name);
+  }, [user]);
+
+  const login = useCallback(async (credentials: LoginRequest): Promise<void> => {
     setIsLoading(true);
     try {
       const user = await authService.login(credentials);
       setUser(user);
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const register = async (userData: RegisterRequest): Promise<void> => {
-    setIsLoading(true);
-    try {
-      const user = await authService.register(userData);
-      setUser(user);
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = (): void => {
-    authService.logout();
-    setUser(null);
-  };
-
-  const hasRole = (roleName: string): boolean => {
-    return authService.hasRole(roleName);
-  };
-
-  const hasAnyRole = (roleNames: string[]): boolean => {
-    return authService.hasAnyRole(roleNames);
-  };
+  }, []);
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated: user !== null,
     isLoading,
-    login,
-    register,
+    updateUser,
+    setUser,
     logout,
     hasRole,
     hasAnyRole,
+    login
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

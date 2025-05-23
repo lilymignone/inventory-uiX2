@@ -34,8 +34,11 @@ class InventoryService {
         if (queryString) url += `?${queryString}`;
       }
 
-      const response = await axios.get(url, {
+      const response = await axios({
+        method: 'GET',
+        url: url,
         headers: this.getHeaders(),
+        withCredentials: true
       });
 
       return response.data;
@@ -113,11 +116,16 @@ class InventoryService {
 
   async createCategory(categoryData: CategoryDto): Promise<Category> {
     try {
+      // Ensure data is properly formatted as JSON
+      const jsonData = JSON.stringify(categoryData);
       const response = await axios({
         method: 'POST',
         url: `${API_BASE_URL}/categories`,
-        headers: this.getHeaders(),
-        data: categoryData,
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json'
+        },
+        data: jsonData,
         withCredentials: true
       });
       return response.data;
@@ -129,11 +137,16 @@ class InventoryService {
 
   async updateCategory(id: number, categoryData: CategoryDto): Promise<Category> {
     try {
+      // Ensure data is properly formatted as JSON
+      const jsonData = JSON.stringify(categoryData);
       const response = await axios({
         method: 'PUT',
         url: `${API_BASE_URL}/categories/${id}`,
-        headers: this.getHeaders(),
-        data: categoryData,
+        headers: {
+          ...this.getHeaders(),
+          'Content-Type': 'application/json'
+        },
+        data: jsonData,
         withCredentials: true
       });
       return response.data;
@@ -160,10 +173,12 @@ class InventoryService {
   // Suppliers
   async getSuppliers(): Promise<Supplier[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/suppliers`, {
+      const response = await axios({
+        method: 'GET',
+        url: `${API_BASE_URL}/suppliers`,
         headers: this.getHeaders(),
+        withCredentials: true
       });
-
       return response.data;
     } catch (error) {
       console.error('Error fetching suppliers:', error);
@@ -180,6 +195,30 @@ class InventoryService {
       return response.data;
     } catch (error) {
       console.error('Error creating supplier:', error);
+      throw error;
+    }
+  }
+
+  async updateSupplier(id: number, supplierData: Omit<Supplier, 'id' | 'createdAt' | 'updatedAt'>): Promise<Supplier> {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/suppliers/${id}`, supplierData, {
+        headers: this.getHeaders(),
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error updating supplier:', error);
+      throw error;
+    }
+  }
+
+  async deleteSupplier(id: number): Promise<void> {
+    try {
+      await axios.delete(`${API_BASE_URL}/suppliers/${id}`, {
+        headers: this.getHeaders(),
+      });
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
       throw error;
     }
   }

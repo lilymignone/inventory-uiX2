@@ -11,12 +11,12 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        }
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      },
+      '/auth': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

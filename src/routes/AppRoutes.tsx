@@ -1,7 +1,7 @@
 // src/routes/AppRoutes.tsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 
 // Pages
@@ -11,9 +11,11 @@ import { Home } from '../pages/Home';
 import { About } from '../pages/About';
 import { NotFound } from '../pages/NotFound';
 import { CategoriesPage } from '../pages/CategoriesPage';
+import { SuppliersPage } from '../pages/SuppliersPage';
+import { UsersPage } from '../pages/UsersPage';
+import { InventoryPage } from '../features/inventory/InventoryPage';
 
 // Inventory features (to be created)
-import { InventoryPage } from '../features/inventory/InventoryPage';
 
 export const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -58,7 +60,7 @@ export const AppRoutes: React.FC = () => {
         path="/suppliers"
         element={
           <ProtectedRoute requireAnyRole={['ADMIN', 'MANAGER']}>
-            <div className="p-4">Suppliers page (to be implemented)</div>
+            <SuppliersPage />
           </ProtectedRoute>
         }
       />
@@ -68,7 +70,7 @@ export const AppRoutes: React.FC = () => {
         path="/users"
         element={
           <ProtectedRoute requireRoles={['ADMIN']}>
-            <div className="p-4">Users page (to be implemented)</div>
+            <UsersPage />
           </ProtectedRoute>
         }
       />

@@ -1,7 +1,7 @@
 // src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { MainLayout } from '../layouts/MainLayout';
 import { inventoryService } from '../services/inventoryService';
 import type{ Product, Category, Supplier } from '../types/inventory';

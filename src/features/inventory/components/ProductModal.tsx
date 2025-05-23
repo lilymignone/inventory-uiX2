@@ -17,8 +17,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   onClose,
   onSubmit,
   product,
-  categories,
-  suppliers,
+  categories = [],
+  suppliers = [],
   isLoading = false,
 }) => {
   const [formData, setFormData] = useState<ProductDto>({
@@ -26,10 +26,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     description: '',
     availableQuantity: 0,
     unitPrice: 0,
-    categoryId: '',
-    supplierId: '',
+    categoryId: 0,
+    supplierId: 0,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const categoriesList = Array.isArray(categories) ? categories : [];
+  const suppliersList = Array.isArray(suppliers) ? suppliers : [];
 
   useEffect(() => {
     if (product) {
@@ -48,8 +51,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         description: '',
         availableQuantity: 0,
         unitPrice: 0,
-        categoryId: categories[0]?.id || '',
-        supplierId: suppliers[0]?.id || '',
+        categoryId: categoriesList[0]?.id || 0,
+        supplierId: suppliersList[0]?.id || 0,
       });
     }
     setErrors({});
@@ -59,7 +62,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'availableQuantity' || name === 'unitPrice' ? parseFloat(value) || 0 : value,
+      [name]: name === 'availableQuantity' || name === 'unitPrice' ? 
+        parseFloat(value) || 0 : 
+        name === 'categoryId' || name === 'supplierId' ? 
+          parseInt(value) || 0 : 
+          value,
     }));
     
     // Clear error when user starts typing
@@ -228,7 +235,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         disabled={isLoading}
                       >
                         <option value="">Select a category</option>
-                        {categories.map((category) => (
+                        {categoriesList.map((category) => (
                           <option key={category.id} value={category.id}>
                             {category.name}
                           </option>
@@ -253,7 +260,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         disabled={isLoading}
                       >
                         <option value="">Select a supplier</option>
-                        {suppliers.map((supplier) => (
+                        {suppliersList.map((supplier) => (
                           <option key={supplier.id} value={supplier.id}>
                             {supplier.name}
                           </option>

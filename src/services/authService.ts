@@ -1,9 +1,10 @@
 // src/services/authService.ts
 import axios from 'axios';
 import type { LoginRequest, RegisterRequest, User } from '../types/auth';
+import { config } from '../config/config';
 
-// Using relative URLs that will be handled by the proxy
-const API_BASE_URL = '';
+// Use the API URL from config
+const API_BASE_URL = config.API_BASE_URL;
 
 class AuthService {
   private currentUser: User | null = null;
@@ -11,11 +12,12 @@ class AuthService {
 
   async login(loginData: LoginRequest): Promise<User> {
     try {
-      // First, attempt login using relative URL
-      const loginResponse = await axios.post(`${API_BASE_URL}/auth/login`, loginData, {
+      // Use relative URL since we have proxy configuration
+      const loginResponse = await axios.post('/auth/login', loginData, {
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        withCredentials: true
       });
 
       // Store credentials for basic auth
@@ -45,7 +47,7 @@ class AuthService {
 
   async register(registerData: RegisterRequest): Promise<User> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, registerData, {
+      const response = await axios.post('/auth/register', registerData, {
         headers: {
           'Content-Type': 'application/json',
         },
