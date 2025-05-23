@@ -1,4 +1,5 @@
 // src/features/inventory/inventoryService.ts
+import axios from 'axios';
 import type { Product, ProductDto, Category, Supplier, ProductFilters } from '../types/inventory';
 import { authService } from '../services/authService';
 
@@ -31,15 +32,11 @@ class InventoryService {
         if (queryString) url += `?${queryString}`;
       }
 
-      const response = await fetch(url, {
+      const response = await axios.get(url, {
         headers: this.getHeaders(),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products: ${response.statusText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error fetching products:', error);
       throw error;
@@ -48,15 +45,11 @@ class InventoryService {
 
   async getProductById(id: string): Promise<Product> {
     try {
-      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      const response = await axios.get(`${API_BASE_URL}/products/${id}`, {
         headers: this.getHeaders(),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch product: ${response.statusText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error fetching product:', error);
       throw error;
@@ -65,18 +58,11 @@ class InventoryService {
 
   async createProduct(productData: ProductDto): Promise<Product> {
     try {
-      const response = await fetch(`${API_BASE_URL}/products`, {
-        method: 'POST',
+      const response = await axios.post(`${API_BASE_URL}/products`, productData, {
         headers: this.getHeaders(),
-        body: JSON.stringify(productData),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to create product: ${errorText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error creating product:', error);
       throw error;
@@ -85,18 +71,11 @@ class InventoryService {
 
   async updateProduct(id: string, productData: ProductDto): Promise<Product> {
     try {
-      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: 'PUT',
+      const response = await axios.put(`${API_BASE_URL}/products/${id}`, productData, {
         headers: this.getHeaders(),
-        body: JSON.stringify(productData),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update product: ${errorText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error updating product:', error);
       throw error;
@@ -105,14 +84,9 @@ class InventoryService {
 
   async deleteProduct(id: string): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: 'DELETE',
+      await axios.delete(`${API_BASE_URL}/products/${id}`, {
         headers: this.getHeaders(),
       });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete product: ${response.statusText}`);
-      }
     } catch (error) {
       console.error('Error deleting product:', error);
       throw error;
@@ -122,15 +96,11 @@ class InventoryService {
   // Categories
   async getCategories(): Promise<Category[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/categories`, {
+      const response = await axios.get(`${API_BASE_URL}/categories`, {
         headers: this.getHeaders(),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch categories: ${response.statusText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error fetching categories:', error);
       throw error;
@@ -139,18 +109,11 @@ class InventoryService {
 
   async createCategory(categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category> {
     try {
-      const response = await fetch(`${API_BASE_URL}/categories`, {
-        method: 'POST',
+      const response = await axios.post(`${API_BASE_URL}/categories`, categoryData, {
         headers: this.getHeaders(),
-        body: JSON.stringify(categoryData),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to create category: ${errorText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error creating category:', error);
       throw error;
@@ -160,15 +123,11 @@ class InventoryService {
   // Suppliers
   async getSuppliers(): Promise<Supplier[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/suppliers`, {
+      const response = await axios.get(`${API_BASE_URL}/suppliers`, {
         headers: this.getHeaders(),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch suppliers: ${response.statusText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error fetching suppliers:', error);
       throw error;
@@ -177,18 +136,11 @@ class InventoryService {
 
   async createSupplier(supplierData: Omit<Supplier, 'id' | 'createdAt' | 'updatedAt'>): Promise<Supplier> {
     try {
-      const response = await fetch(`${API_BASE_URL}/suppliers`, {
-        method: 'POST',
+      const response = await axios.post(`${API_BASE_URL}/suppliers`, supplierData, {
         headers: this.getHeaders(),
-        body: JSON.stringify(supplierData),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to create supplier: ${errorText}`);
-      }
-
-      return await response.json();
+      return response.data;
     } catch (error) {
       console.error('Error creating supplier:', error);
       throw error;

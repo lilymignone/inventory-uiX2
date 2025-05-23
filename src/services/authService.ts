@@ -1,7 +1,9 @@
 // src/services/authService.ts
-import type{ LoginRequest, RegisterRequest, User } from '../types/auth';
+import axios from 'axios';
+import type { LoginRequest, RegisterRequest, User } from '../types/auth';
 
-const API_BASE_URL = 'http://localhost:8080';
+// Using relative URLs that will be handled by the proxy
+const API_BASE_URL = '';
 
 class AuthService {
   private currentUser: User | null = null;
@@ -9,56 +11,29 @@ class AuthService {
 
   async login(loginData: LoginRequest): Promise<User> {
     try {
-      // First, attempt login
-      const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
+      // First, attempt login using relative URL
+      const loginResponse = await axios.post(`${API_BASE_URL}/auth/login`, loginData, {
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
+        }
       });
-
-      if (!loginResponse.ok) {
-        const errorText = await loginResponse.text();
-        throw new Error(`Login failed: ${errorText}`);
-      }
 
       // Store credentials for basic auth
       const basicAuth = btoa(`${loginData.email}:${loginData.password}`);
       this.credentials = basicAuth;
 
-      // Get user profile
-      const userResponse = await fetch(`${API_BASE_URL}/api/users/profile`, {
-        headers: {
-          'Authorization': `Basic ${basicAuth}`,
-        },
-      });
-
-      if (!userResponse.ok) {
-        // If we can't get user profile, try to get current user info differently
-        // For now, we'll create a basic user object from the login info
-        const user: User = {
-          id: 'current-user',
-          email: loginData.email,
-          fullName: loginData.email.split('@')[0], // Fallback name
-          status: 'ACTIVE',
-          role: {
-            id: 'role-id',
-            name: 'USER',
-            description: 'User role',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        
-        this.currentUser = user;
-        this.storeAuthData(basicAuth, user);
-        return user;
-      }
-
-      const user = await userResponse.json();
+      // Since your backend doesn't have a user profile endpoint, 
+      // create a user object with default admin/manager roles
+      const user: User = {
+        id: 'current-user',
+        email: loginData.email,
+        fullName: this.getNameFromEmail(loginData.email),
+        status: 'ACTIVE',
+        role: this.determineRole(loginData.email),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
       this.currentUser = user;
       this.storeAuthData(basicAuth, user);
       return user;
@@ -70,20 +45,14 @@ class AuthService {
 
   async register(registerData: RegisterRequest): Promise<User> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, registerData, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(registerData),
+        withCredentials: true,
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Registration failed: ${errorText}`);
-      }
-
-      const user = await response.json();
+      const user = response.data;
       
       // After successful registration, log the user in
       await this.login({
@@ -140,6 +109,44 @@ class AuthService {
   hasAnyRole(roleNames: string[]): boolean {
     const user = this.getCurrentUser();
     return user ? roleNames.includes(user.role.name) : false;
+  }
+
+  private determineRole(email: string) {
+    // Default role determination based on email
+    if (email === 'admin@inventory.com') {
+      return {
+        id: 'admin-role',
+        name: 'ADMIN',
+        description: 'System Administrator with full access',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    } else if (email === 'manager@inventory.com') {
+      return {
+        id: 'manager-role',
+        name: 'MANAGER',
+        description: 'Manager with limited access',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      return {
+        id: 'user-role',
+        name: 'USER',
+        description: 'Regular user',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  }
+
+  private getNameFromEmail(email: string): string {
+    if (email === 'admin@inventory.com') return 'System Administrator';
+    if (email === 'manager@inventory.com') return 'Inventory Manager';
+    
+    // Extract name from email
+    const localPart = email.split('@')[0];
+    return localPart.charAt(0).toUpperCase() + localPart.slice(1);
   }
 
   private storeAuthData(credentials: string, user: User): void {
