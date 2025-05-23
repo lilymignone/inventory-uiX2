@@ -2,9 +2,9 @@
 import axios from 'axios';
 import type { Product, ProductDto, Category, Supplier, ProductFilters, CategoryDto, CategoryFilters } from '../types/inventory';
 import { authService } from '../services/authService';
+import { config } from '../config/config';
 
-// Using relative URL for proxy
-const API_BASE_URL = '/api';
+const API_BASE_URL = `${config.API_BASE_URL}/api`;
 
 class InventoryService {
   private getHeaders(): Record<string, string> {
@@ -23,8 +23,8 @@ class InventoryService {
       if (filters) {
         const params = new URLSearchParams();
         if (filters.search) params.append('search', filters.search);
-        if (filters.categoryId) params.append('categoryId', filters.categoryId);
-        if (filters.supplierId) params.append('supplierId', filters.supplierId);
+        if (filters.categoryId) params.append('categoryId', filters.categoryId.toString());
+        if (filters.supplierId) params.append('supplierId', filters.supplierId.toString());
         if (filters.minPrice !== undefined) params.append('minPrice', filters.minPrice.toString());
         if (filters.maxPrice !== undefined) params.append('maxPrice', filters.maxPrice.toString());
         if (filters.minQuantity !== undefined) params.append('minQuantity', filters.minQuantity.toString());
@@ -45,7 +45,7 @@ class InventoryService {
     }
   }
 
-  async getProductById(id: string): Promise<Product> {
+  async getProductById(id: number): Promise<Product> {
     try {
       const response = await axios.get(`${API_BASE_URL}/products/${id}`, {
         headers: this.getHeaders(),
@@ -71,7 +71,7 @@ class InventoryService {
     }
   }
 
-  async updateProduct(id: string, productData: ProductDto): Promise<Product> {
+  async updateProduct(id: number, productData: ProductDto): Promise<Product> {
     try {
       const response = await axios.put(`${API_BASE_URL}/products/${id}`, productData, {
         headers: this.getHeaders(),
@@ -84,7 +84,7 @@ class InventoryService {
     }
   }
 
-  async deleteProduct(id: string): Promise<void> {
+  async deleteProduct(id: number): Promise<void> {
     try {
       await axios.delete(`${API_BASE_URL}/products/${id}`, {
         headers: this.getHeaders(),
@@ -184,7 +184,6 @@ class InventoryService {
     }
   }
 
-  // Category endpoints
   async getCategory(id: number): Promise<Category> {
     const response = await axios.get(`${API_BASE_URL}/categories/${id}`);
     return response.data;

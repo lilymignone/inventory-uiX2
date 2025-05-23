@@ -1,6 +1,6 @@
 // src/types/inventory.ts
 export interface Product {
-    id: string;
+    id: number;
     name: string;
     description: string;
     availableQuantity: number;  // Changed from 'quantity' to match backend
@@ -12,13 +12,13 @@ export interface Product {
   }
   
   export interface ProductDto {
-    id?: string;
+    id?: number;
     name: string;
     description: string;
     availableQuantity: number;
     unitPrice: number;
-    categoryId: string;
-    supplierId: string;
+    categoryId: number;
+    supplierId: number;
   }
   
   export interface Category {
@@ -41,7 +41,7 @@ export interface Product {
   }
   
   export interface Supplier {
-    id: string;
+    id: number;
     name: string;
     email: string;
     phone: string;
@@ -53,8 +53,8 @@ export interface Product {
   
   export interface ProductFilters {
     search?: string;
-    categoryId?: string;
-    supplierId?: string;
+    categoryId?: number;
+    supplierId?: number;
     minPrice?: number;
     maxPrice?: number;
     minQuantity?: number;
